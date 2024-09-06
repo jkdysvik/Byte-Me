@@ -3,11 +3,13 @@ import numpy as np
 import random
 from find_dots import find_dots
 
+
 class Piece:
     def __init__(self, x, y, piece_type):
         self.x = x
         self.y = y
         self.type = piece_type  # 1 for player piece, 2 for opponent piece
+        self.king = False
 
     def move(self, new_x, new_y):
         self.x = new_x
@@ -48,6 +50,8 @@ class Game:
         self.opponent_pieces = []
         self.player_legal_moves = []
         self.opponent_legal_moves = []
+        self.previous_board = []
+        self.new_board = []
 
     def add_piece(self, piece):
         self.board.place_piece(piece)
@@ -83,15 +87,42 @@ class Game:
         for point in points:
             game.add_piece(Piece(point[0], point[1], 1))
 
+    def check_legality(self, new_board, player_legal_moves):
+        return None
 
+    def find_difference(self, previous_board, new_board):
+        removed_piece = None
+        moved_piece = None
+
+        # Detect the removed piece
+        for prev_piece in previous_board:
+            if prev_piece not in new_board:
+                removed_piece = prev_piece
+                break
+
+        # Detect the moved piece
+        for new_piece in new_board:
+            if new_piece not in previous_board:
+                moved_piece = new_piece
+                break
+
+        if removed_piece and moved_piece:
+            print(f"Piece moved from {removed_piece} to {moved_piece}")
+            return removed_piece, moved_piece
+        else:
+            print("No move detected.")
+            return None, None
 
     def play_game(self):
         turn = 0
-        while True:
-            imgnr = input("Img: ")
-            game.find_player_pieces(imgnr)
-            self.board.print_board()
+        game.find_player_pieces("2245")
+        self.previous_board = find_dots("2245")  # Initial board state
+        self.board.print_board()
 
+        while True:
+
+            if turn != 0:
+                self.board.print_board()
             # Clear previous moves
             self.player_legal_moves.clear()
             self.opponent_legal_moves.clear()
@@ -109,20 +140,25 @@ class Game:
                 break
 
             if turn % 2 == 0:  # Player's turn
-                if self.player_legal_moves:
-                    print("Player legal moves:")
-                    for i, move in enumerate(self.player_legal_moves):
-                        piece, x, y = move
-                        print(f"{i}: Move piece at ({piece.x},{piece.y}) to ({x},{y})")
+                imgnr = input("Img: ")
 
-                    # Player chooses a move
-                    move_index = int(input("Choose move by index: "))
-                    chosen_piece, new_x, new_y = self.player_legal_moves[move_index]
+                # Save the current board state as the new board
+                self.new_board = find_dots(imgnr)
 
-                    # Execute the move
+                # Find the difference between the previous and new board
+                removed_piece, moved_piece = self.find_difference(self.previous_board, self.new_board)
+
+                if removed_piece and moved_piece:
+                    # Execute the move on the board
+                    chosen_piece = Piece(removed_piece[0], removed_piece[1], 1)  # Assuming it's a player piece
+                    new_x, new_y = moved_piece[0], moved_piece[1]
                     self.board.move_piece(chosen_piece, new_x, new_y)
+
+                    # Update the previous board to the new one
+                    self.previous_board = self.new_board.copy()
                 else:
-                    print("No legal moves available for the player.")
+                    print("No valid move detected.")
+
             else:  # Opponent's turn
                 if self.opponent_legal_moves:
                     opp_move_index = random.randint(0, len(self.opponent_legal_moves) - 1)

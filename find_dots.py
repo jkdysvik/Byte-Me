@@ -73,11 +73,7 @@ def find_dots(imgnr):
     green_dots_coordinates = merge_close_points(green_dots_coordinates)
     red_dots_coordinates = merge_close_points(red_dots_coordinates)
 
-    # Print the coordinates of the detected green and red dots
-    print("Green Dots:", green_dots_coordinates)
-    print(f"Number of detected green dots: {len(green_dots_coordinates)}")
-    print("Red Dots:", red_dots_coordinates)
-    print(f"Number of detected red dots: {len(red_dots_coordinates)}")
+
 
     # Optional: draw the detected points on the image for visualization
     for coord in green_dots_coordinates:
@@ -85,33 +81,23 @@ def find_dots(imgnr):
     for coord in red_dots_coordinates:
         cv2.circle(image, coord, 10, (0, 0, 255), -1)  # Draw red dots on the detected points
 
-    min = 1000000000
-    max = 0
-    for coordinate in green_dots_coordinates:
-        if coordinate[1] < min:
-            min = coordinate[1]
-        elif coordinate[1] > max:
-            max = coordinate[1]
+    min_x = min([coord[0] for coord in green_dots_coordinates], default=0)
+    max_x = max([coord[0] for coord in green_dots_coordinates], default=1)
+    min_y = min([coord[1] for coord in green_dots_coordinates], default=0)
+    max_y = max([coord[1] for coord in green_dots_coordinates], default=1)
 
-        if coordinate[0] < min:
-            min = coordinate[0]
-        elif coordinate[0] > max:
-            max = coordinate[0]
 
-    print(min)
-    print(max)
-    edges = []
-    for i in range(0, 9):
-        edges.append(i * (max - min) / 8)
+    edges_x = [min_x + i * (max_x - min_x) / 8 for i in range(9)]
+    edges_y = [min_y + i * (max_y - min_y) / 8 for i in range(9)]
 
     red_dots_location = []
 
     for dot in red_dots_coordinates:
         x, y = dot
         # Find the row index by comparing y with vertical edges
-        row = next(k for k, edge in enumerate(edges) if y < edge)
+        row = next(k for k, edge in enumerate(edges_y) if y < edge)
         # Find the column index by comparing x with horizontal edges
-        col = next(j for j, edge in enumerate(edges) if x < edge)
-        red_dots_location.append((col-1, 8 - row, 1))
+        col = next(j for j, edge in enumerate(edges_x) if x < edge)
+        red_dots_location.append((col, 8 - row+1, 1))
 
     return red_dots_location
