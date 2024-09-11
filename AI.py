@@ -277,12 +277,12 @@ def AI():
              ['w', ' ', ' ', ' ', ' ', 'w', 'w', ' ', ],
              [' ', 'w', ' ', 'w', ' ', 'w', ' ', 'w', ],
              [' ', ' ', 'w', ' ', 'w', ' ', 'w', ' ', ]]
-    path = callMinimax(board, 'b', 2)
+    human_move = [(2,1), (3, 1)]
+    if not canMove(board, player_move, 'b'):
+    print('false')
+    """path = callMinimax(board, 'b', 2)
     makeMove(board, path)
-    # print(board)
     b = [''.join(line) for line in board]
     b = '\n'.join(b)
-    print(b)
-
-
-AI()
+    print(b)"""
+#AI()
