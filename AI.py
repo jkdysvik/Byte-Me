@@ -30,6 +30,20 @@ def initBoard():
     return board
 
 
+# check whether the move list is valid
+def canMove(board, move_list, color):
+    paths = getAllMoves(board, color)
+    for path in paths:
+        if len(path) == len(move_list): # the move is in the valid move list ?
+            same = True
+            for i in range(len(move_list)):
+                if path[i] != move_list[i]:
+                    same = False
+                    break
+            if same:
+                return True
+    return False
+
 # make the move on the board
 def makeMove(board, move_list):
     regicide = False
@@ -238,12 +252,19 @@ def minimax(board, depth, max_depth, color, alpha, beta):
 
 def callMinimax(board, color, search_depth):
     global AI_path
-
+    
     alpha, beta = -999999, 999999
     AI_path = []
     minimax(board, 0, search_depth, color, alpha, beta)
-    print('AI: ', AI_path)
-
+    if color == 'b' and AI_path == []:
+        print("White win!")
+        return AI_path
+    elif color == 'w' and AI_path == []:
+        print("Black win!")
+        return AI_path
+    else:
+        print('AI: ', AI_path)
+    
     return AI_path
 
 
