@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import random
 from find_dots import find_dots
-
+from AI import AI
 
 class Piece:
     def __init__(self, x, y, piece_type):
@@ -21,6 +21,14 @@ class Board:
 
     def place_piece(self, piece):
         self.board[8 - piece.y][piece.x - 1] = piece.type
+
+    def find_piece(self, x, y):
+        """Find the piece object located at (x, y)"""
+        for row in self.board:
+            for piece in row:
+                if piece and piece.x == x and piece.y == y:
+                    return piece
+        return None
 
     def remove_piece(self, piece):
         self.board[8 - piece.y][piece.x - 1] = None
@@ -42,6 +50,18 @@ class Board:
 
     def check_square(self, x, y):
         return self.board[8 - y][x - 1] if 0 <= x - 1 < 8 and 0 <= 8 - y < 8 else None
+
+    def get_board_array(self):
+        """Convert the internal board representation into an array of 'w' and 'b'"""
+        board_array = []
+        for row in self.board:
+            board_row = ["w" if cell == 1 else "b" if cell == 2 else " " for cell in row]
+            board_array.append(board_row)
+        print(board_array)
+        result = AI(board_array)
+        return result
+
+
 
 class Game:
     def __init__(self):
@@ -161,12 +181,20 @@ class Game:
 
             else:  # Opponent's turn
                 if self.opponent_legal_moves:
-                    opp_move_index = random.randint(0, len(self.opponent_legal_moves) - 1)
-                    chosen_piece, new_x, new_y = self.opponent_legal_moves[opp_move_index]
-                    print(f"Opponent moves piece at ({chosen_piece.x},{chosen_piece.y}) to ({new_x},{new_y})")
+                    best_move = AI(self.board.get_board_array())
+                    print("Ai move: " + best_move)
+                    old_x, old_y = best_move[0]
+                    new_x, new_y = best_move[1]
 
-                    # Execute the move
-                    self.board.move_piece(chosen_piece, new_x, new_y)
+                    # Find the piece at (old_x, old_y)
+                    chosen_piece = self.board.find_piece(old_x, old_y)
+
+                    if chosen_piece:
+                        print(f"Opponent moves piece at ({old_x},{old_y}) to ({new_x},{new_y})")
+                        self.board.move_piece(chosen_piece, new_x, new_y)
+                        print(self.board.get_board_array())
+                    else:
+                        print(f"No piece found at ({old_x},{old_y})")
                 else:
                     print("No legal moves available for the opponent.")
 
