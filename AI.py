@@ -34,7 +34,7 @@ def initBoard():
 def canMove(board, move_list, color):
     paths = getAllMoves(board, color)
     for path in paths:
-        if len(path) == len(move_list): # the move is in the valid move list ?
+        if len(path) == len(move_list):  # the move is in the valid move list ?
             same = True
             for i in range(len(move_list)):
                 if path[i] != move_list[i]:
@@ -43,6 +43,7 @@ def canMove(board, move_list, color):
             if same:
                 return True
     return False
+
 
 # make the move on the board
 def makeMove(board, move_list):
@@ -97,10 +98,14 @@ def evaluation(board, color):
     score = 0
     for y in range(N):
         for x in range(N):
-            if board[y][x] == 'B': score += 10
-            if board[y][x] == 'b': score += 1
-            if board[y][x] == 'W': score -= 10
-            if board[y][x] == 'w': score -= 1
+            if board[y][x] == 'B':
+                score += 10
+            if board[y][x] == 'b':
+                score += 1
+            if board[y][x] == 'W':
+                score -= 10
+            if board[y][x] == 'w':
+                score -= 1
     if color == 'b':
         return score
     else:
@@ -123,12 +128,14 @@ def getAllMoves(board, color='b'):
         dir = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
         jump_num = 0
         for k in range(len(dir)):  # try 4 directions from (y,x)
-            if color == 'b' and dir[k][0] < 0: continue  # 'b' can only move down
-            if color == 'w' and dir[k][0] > 0: continue  # 'w' can only move up
+            if color == 'b' and dir[k][0] < 0:
+                continue  # 'b' can only move down
+            if color == 'w' and dir[k][0] > 0:
+                continue  # 'w' can only move up
 
             my, mx = y + dir[k][0], x + dir[k][1]
             ey, ex = y + 2 * dir[k][0], x + 2 * dir[k][1]
-            if 0 <= ey and ey < N and 0 <= ex and ex < N:
+            if 0 <= ey < N and 0 <= ex < N:
                 color2 = board[my][mx]
                 regicide = False  # eat the King ?
                 if color in ['b', 'w'] and color2 in ['B', 'W']:
@@ -190,7 +197,7 @@ def getAllMoves(board, color='b'):
                         if color == 'b' and dir[k][0] < 0: continue  # 'b' can only move down
                         if color == 'w' and dir[k][0] > 0: continue  # 'w' can only move up
                         ey, ex = y + dir[k][0], x + dir[k][1]
-                        if 0 <= ey and ey < N and 0 <= ex and ex < N and board[ey][ex] == ' ':
+                        if 0 <= ey < N and 0 <= ex < N and board[ey][ex] == ' ':
                             paths.append([(y, x), (ey, ex)])
 
             y += dy
@@ -252,7 +259,7 @@ def minimax(board, depth, max_depth, color, alpha, beta):
 
 def callMinimax(board, color, search_depth):
     global AI_path
-    
+
     alpha, beta = -999999, 999999
     AI_path = []
     minimax(board, 0, search_depth, color, alpha, beta)
@@ -264,25 +271,23 @@ def callMinimax(board, color, search_depth):
         return AI_path
     else:
         print('AI: ', AI_path)
-    
+
     return AI_path
 
 
-def AI():
-    board = [[' ', 'b', ' ', 'b', ' ', 'b', ' ', 'b', ],
-             ['b', ' ', 'b', ' ', 'b', ' ', 'b', ' ', ],
-             [' ', '', ' ', 'b', ' ', 'b', ' ', 'b', ],
-             ['b', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ],
-             [' ', 'w', ' ', ' ', ' ', ' ', ' ', ' ', ],
-             ['w', ' ', ' ', ' ', ' ', 'w', 'w', ' ', ],
-             [' ', 'w', ' ', 'w', ' ', 'w', ' ', 'w', ],
-             [' ', ' ', 'w', ' ', 'w', ' ', 'w', ' ', ]]
-    human_move = [(2,1), (3, 1)]
-    if not canMove(board, player_move, 'b'):
+board = [[' ', 'b', ' ', 'b', ' ', 'b', ' ', 'b', ],
+         ['b', ' ', 'b', ' ', 'b', ' ', 'b', ' ', ],
+         [' ', 'b', ' ', 'b', ' ', 'b', ' ', 'b', ],
+         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ],
+         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ],
+         ['w', ' ', 'w', ' ', 'w', ' ', 'w', ' ', ],
+         [' ', 'w', ' ', 'w', ' ', 'w', ' ', 'w', ],
+         ['w', ' ', 'w', ' ', 'w', ' ', 'w', ' ', ]]
+player_move = [(2, 1), (3, 1)]
+if not canMove(board, player_move, 'b'):
     print('false')
-    """path = callMinimax(board, 'b', 2)
-    makeMove(board, path)
-    b = [''.join(line) for line in board]
-    b = '\n'.join(b)
-    print(b)"""
-#AI()
+"""path = callMinimax(board, 'b', 2)
+makeMove(board, path)
+b = [''.join(line) for line in board]
+b = '\n'.join(b)
+print(b)"""
