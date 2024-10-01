@@ -4,8 +4,8 @@ from tkinter import messagebox
 # Constants for the game
 BOARD_SIZE = 8
 CELL_SIZE = 60
-P1_COLOR = "black"
-P2_COLOR = "red"
+P1_COLOR = "white"
+P2_COLOR = "black"
 HIGHLIGHT_COLOR = "yellow"
 KING_COLOR = "gold"
 MARKER_COLOR = "green"  # Color for the corner markers
@@ -156,11 +156,13 @@ class CheckersGUI:
         self.draw_markers(board_offset)
 
     def draw_piece(self, row, col, piece, offset):
+        if piece.player == 'P1':  # Skip drawing P2 pieces
+            return
         x1 = col * CELL_SIZE + offset
         y1 = row * CELL_SIZE + offset
         x2 = x1 + CELL_SIZE
         y2 = y1 + CELL_SIZE
-        color = P1_COLOR if piece.player == 'P1' else P2_COLOR
+        color = P2_COLOR if piece.player == 'P2' else P1_COLOR
         if piece.is_king:
             color = KING_COLOR
         self.canvas.create_oval(x1 + 5, y1 + 5, x2 - 5, y2 - 5, fill=color)

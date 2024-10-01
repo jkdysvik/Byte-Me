@@ -5,20 +5,24 @@ def find_dots(imgnr):
     image = cv2.imread("IMG_" + imgnr + ".jpg")
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    # Adjust the HSV range for green detection (more restrictive)
-    lower_green = np.array([60, 40, 0])  # Increased the minimum saturation and value
-    upper_green = np.array([140, 200, 70])
+    # Refine the HSV range for green detection (narrower for the specific green dots)
+    lower_green = np.array([35, 50, 50])
+    upper_green = np.array([85, 255, 255])
     mask_green = cv2.inRange(hsv, lower_green, upper_green)
+    cv2.imwrite("mask_green.jpg", mask_green)
 
-    # Adjust the HSV range for red detection (red spans around the hue 0/180 boundary)
-    lower_red1 = np.array([0, 70, 50])
+    # Adjust the HSV range for red detection
+    lower_red1 = np.array([0, 100, 100])
     upper_red1 = np.array([10, 255, 255])
-    lower_red2 = np.array([170, 70, 50])
+    lower_red2 = np.array([170, 100, 100])
     upper_red2 = np.array([180, 255, 255])
 
     mask_red1 = cv2.inRange(hsv, lower_red1, upper_red1)
     mask_red2 = cv2.inRange(hsv, lower_red2, upper_red2)
     mask_red = cv2.bitwise_or(mask_red1, mask_red2)
+
+    cv2.imwrite("mask_red.jpg", mask_red)
+
 
     # Perform morphological operations to close gaps in both masks
     kernel = np.ones((5, 5), np.uint8)
@@ -29,7 +33,7 @@ def find_dots(imgnr):
     mask_red = cv2.morphologyEx(mask_red, cv2.MORPH_OPEN, kernel)
 
     # Function to find and filter dots based on color and contour area
-    def find_dots(mask, lower_hue, upper_hue, min_contour_area=100):
+    def find_dots(mask, lower_hue, upper_hue, min_contour_area=1000):  # Increased contour area
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         dots_coordinates = []
 
@@ -57,7 +61,7 @@ def find_dots(imgnr):
     green_dots_coordinates = find_dots(mask_green, lower_green[0], upper_green[0])
     red_dots_coordinates = find_dots(mask_red, lower_red1[0], upper_red2[0])
 
-    def merge_close_points(points, threshold=50):
+    def merge_close_points(points, threshold=100):  # Increased threshold for merging close points
         merged_points = []
         while points:
             point = points.pop(0)
@@ -71,22 +75,23 @@ def find_dots(imgnr):
 
     # Merge close points for both green and red dots
     green_dots_coordinates = merge_close_points(green_dots_coordinates)
-    print(green_dots_coordinates)
+    print("Green dots:", green_dots_coordinates)
     red_dots_coordinates = merge_close_points(red_dots_coordinates)
+    print(red_dots_coordinates)
 
-
-
-    # Optional: draw the detected points on the image for visualization
+    # Draw the detected points on the image for visualization
     for coord in green_dots_coordinates:
-        cv2.circle(image, coord, 10, (0, 255, 0), -1)  # Draw green dots on the detected points
+        cv2.circle(image, coord, 10, (0, 255, 0), -1)  # Draw green dots
     for coord in red_dots_coordinates:
-        cv2.circle(image, coord, 10, (0, 0, 255), -1)  # Draw red dots on the detected points
+        cv2.circle(image, coord, 10, (0, 0, 255), -1)  # Draw red dots
+
+    # Save the final image with detected dots
+    cv2.imwrite("dots_detected.jpg", image)
 
     min_x = min([coord[0] for coord in green_dots_coordinates], default=0)
     max_x = max([coord[0] for coord in green_dots_coordinates], default=1)
     min_y = min([coord[1] for coord in green_dots_coordinates], default=0)
     max_y = max([coord[1] for coord in green_dots_coordinates], default=1)
-
 
     edges_x = [min_x + i * (max_x - min_x) / 8 for i in range(9)]
     edges_y = [min_y + i * (max_y - min_y) / 8 for i in range(9)]
@@ -99,8 +104,8 @@ def find_dots(imgnr):
         row = next(k for k, edge in enumerate(edges_y) if y < edge)
         # Find the column index by comparing x with horizontal edges
         col = next(j for j, edge in enumerate(edges_x) if x < edge)
-        red_dots_location.append((col, 8 - row+1, 1))
+        red_dots_location.append((col, 8 - row + 1, 1))
 
-    return red_dots_location
+    print(red_dots_location)
 
-find_dots("2982")
+find_dots("3027")
